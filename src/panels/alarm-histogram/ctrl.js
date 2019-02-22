@@ -112,6 +112,11 @@ class AlarmHistogramCtrl extends MetricsPanelCtrl {
             return true;
         }
 
+        // if the panel isn't finished loading, row may not yet be initialized
+        if (!this.ctrl.row) {
+            return true;
+        }
+
         let height = this.ctrl.height || this.ctrl.panel.height || this.ctrl.row.height;
         if (_.isString(height)) {
             height = parseInt(height.replace('px', ''), 10);
