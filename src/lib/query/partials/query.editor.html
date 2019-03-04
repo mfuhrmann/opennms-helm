@@ -3,7 +3,7 @@
     <div class="gf-form-inline">
         <div class="gf-form">
             <label class="gf-form-label query-keyword width-7">SELECT</label>
-            <label class="gf-form-label width-7">all alarms</label>
+            <label class="gf-form-label width-7">all</label>
         </div>
     </div>
 
@@ -13,7 +13,7 @@
 
     <div class="gf-form" style="padding-top: 15px">
         <label class="gf-form-label width-6">Limit</label>
-        <input type="number" placeholder="Query Limit" class="gf-form-input width-4" ng-model="ctrl.target.limit" ng-model-options='{ debounce: 250 }' bs-tooltip="'Limit the number of alarms returned (0=unlimited)'" ng-change="ctrl.onChangeInternal()" data-min-length=0 data-items=100>
+        <input type="number" placeholder="Query Limit" class="gf-form-input width-4" ng-model="ctrl.target.limit" ng-model-options='{ debounce: 250 }' bs-tooltip="'Limit the number of items returned (0=unlimited)'" ng-change="ctrl.onChangeInternal()" data-min-length=0 data-items=100>
         <span style="color: rgb(229, 189, 28); padding-left: 1em" ng-if="ctrl.target.limit > 0">
             <i class="fa fa-warning"></i>
             Note: When using limits, column sorting only applies to the returned results.

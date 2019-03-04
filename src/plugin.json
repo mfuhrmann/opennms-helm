@@ -19,17 +19,18 @@
     ],
     "screenshots": [
       {"name": "Alarms", "path": "img/Helm_Screenshot_Alarms.png"},
-      {"name": "Environemnt Sensors", "path": "img/Helm_Screenshot_Environmental.png"},
+      {"name": "Environment Sensors", "path": "img/Helm_Screenshot_Environmental.png"},
       {"name": "Fault Data Source", "path": "img/Helm_Screenshot_Faults_Data_Source.png"},
       {"name": "Metrics", "path": "img/Helm_Screenshot_Metrics.png"},
       {"name": "Performance Data Source", "path": "img/Helm_Screenshot_Performance_Data_Source.png"}
     ],
     "version": "3.0.1-SNAPSHOT",
-    "updated": "2018-07-03"
+    "updated": "2019-03-01"
   },
   "includes": [
     {"type": "panel", "name": "Alarm Table"},
     {"type": "panel", "name": "Alarm Histogram"},
+    {"type": "panel", "name": "Filter Panel"},
     {"type": "datasource", "name": "OpenNMS Faults"},
     {"type": "datasource", "name": "OpenNMS Performance"},
     {"type": "datasource", "name": "OpenNMS Flows"},

@@ -7,7 +7,7 @@ import {UI} from './UI';
 import '../../lib/query/query-directive'
 import {FilterCloner} from "../../lib/query/FilterCloner";
 
-export class OpenNMSFMDatasourceQueryCtrl extends QueryCtrl {
+export class OpenNMSInventoryDatasourceQueryCtrl extends QueryCtrl {
 
   constructor($scope, $injector, $q,uiSegmentSrv)  {
     super($scope, $injector);
@@ -75,5 +75,5 @@ export class OpenNMSFMDatasourceQueryCtrl extends QueryCtrl {
   }
 }
 
-OpenNMSFMDatasourceQueryCtrl.templateUrl = 'lib/query/partials/query.editor.html';
+OpenNMSInventoryDatasourceQueryCtrl.templateUrl = 'lib/query/partials/query.editor.html';
 

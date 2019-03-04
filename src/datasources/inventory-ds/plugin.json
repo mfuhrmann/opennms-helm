@@ -1,0 +1,20 @@
+{
+  "name": "OpenNMS Inventory",
+  "id": "opennms-helm-inventory-datasource",
+  "type": "datasource",
+
+  "partials": {
+    "config": "datasources/inventory-ds/partials/config.html"
+  },
+
+  "metrics": true,
+  "annotations": false,
+
+  "info": {
+    "logos": {
+      "small": "img/in-ds.svg",
+      "large": "img/in-ds.svg"
+    }
+  }
+
+}

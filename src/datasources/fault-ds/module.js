@@ -21,7 +21,7 @@ class OpenNMSFMDatasourceQueryOptionsCtrl {
       this.panelCtrl.panel.targets.push(target);
   }
 }
-OpenNMSFMDatasourceQueryOptionsCtrl.templateUrl = 'datasources/fault-ds/partials/query.options.html';
+OpenNMSFMDatasourceQueryOptionsCtrl.templateUrl = 'lib/query/partials/query.options.html';
 
 export {
   OpenNMSFMDatasource as Datasource,

@@ -95,6 +95,28 @@ export class ClientDelegate {
         return this.clientWithMetadata;
     }
 
+    // Inventory (node) related functions
+
+    getNodeDao() {
+        return this.getClientWithMetadata().then(function(client) {
+            return client.nodes();
+        });
+    }
+
+    findNodes(filter) {
+        return this.getNodeDao()
+            .then(function(nodeDao) {
+                return nodeDao.find(filter);
+            }).catch(this.decorateError);
+    }
+
+    getNode(nodeId) {
+      return this.getNodeDao()
+        .then(function(nodeDao) {
+            return nodeDao.get(nodeId);
+        }).catch(this.decorateError);
+    }
+
     // Fault related functions
 
     getAlarmDao() {

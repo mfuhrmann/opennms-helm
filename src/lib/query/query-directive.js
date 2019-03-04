@@ -1,12 +1,13 @@
 import angular from 'angular';
 import _ from 'lodash';
 import {ComparatorMapping} from "./mapping/ComparatorMapping";
-import {UI} from "./UI";
+
+import { VALUE_PLACEHOLDER } from './constants';
 
 angular.module('grafana.directives')
     .directive('onmsQuery', function() {
         return {
-            templateUrl: 'public/plugins/opennms-helm-app/datasources/fault-ds/partials/query.html',
+            templateUrl: 'public/plugins/opennms-helm-app/lib/query/partials/query.html',
             controller: 'QueryController',
             restrict: 'EA',
             controllerAs: 'ctrl',
@@ -64,7 +65,7 @@ angular.module('grafana.directives')
                 let theQuery = {
                     'find': 'values',
                     'attribute': attributeSegment.value,
-                    'query': segment.value === UI.Restriction.VALUE_PLACEHOLDER ? '' : segment.value
+                    'query': segment.value === VALUE_PLACEHOLDER ? '' : segment.value
                 };
 
                 return datasource.metricFindQuery(theQuery)

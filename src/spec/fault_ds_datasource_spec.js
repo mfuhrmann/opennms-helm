@@ -4,11 +4,13 @@ import moment from 'moment';
 import {UI} from '../datasources/fault-ds/UI';
 import {API} from '../opennms';
 import {Mapping} from '../datasources/fault-ds/Mapping';
-import {FilterCloner} from '../datasources/fault-ds/FilterCloner';
+import {FilterCloner} from '../lib/query/FilterCloner';
 import {OpenNMSFMDatasource as Datasource} from '../datasources/fault-ds/datasource';
 import {ClientDelegate} from '../lib/client_delegate';
 
 import {TemplateSrv} from './template_srv';
+
+import { KEY_PLACEHOLDER, VALUE_PLACEHOLDER } from '../lib/query/constants';
 
 describe("OpenNMS_FaultManagement_Datasource", function() {
     let uiSegmentSrv = {
@@ -218,9 +220,9 @@ describe("OpenNMS_FaultManagement_Datasource", function() {
             expect(restriction.asRestrictionDTO()).to.eql(null);
 
             // Should be null when initialized with defaults
-            restriction.setAttribute(UI.Restriction.KEY_PLACEHOLDER);
+            restriction.setAttribute(KEY_PLACEHOLDER);
             restriction.setComparator("=");
-            restriction.setValue(UI.Restriction.VALUE_PLACEHOLDER);
+            restriction.setValue(VALUE_PLACEHOLDER);
 
             // Should be null for all other Comparators
             Object.keys(UI.Comparators).forEach(key => {
@@ -233,7 +235,7 @@ describe("OpenNMS_FaultManagement_Datasource", function() {
             expect(restriction.asRestrictionDTO()).to.eql(null);
 
             // Should be null if attribute is set
-            restriction.setValue(UI.Restriction.VALUE_PLACEHOLDER);
+            restriction.setValue(VALUE_PLACEHOLDER);
             restriction.setAttribute("my attribute");
             expect(restriction.asRestrictionDTO()).to.eql(null);
 
