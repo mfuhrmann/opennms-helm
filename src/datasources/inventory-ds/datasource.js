@@ -293,21 +293,43 @@ export class OpenNMSInventoryDatasource {
             "Data Source"
         ];
 
-        /*
-        // Build a sorted list of (unique) event parameter names
-        let parameterNames = _.uniq(_.sortBy(_.flatten(_.map(nodes, alarm => {
-          if (!alarm.lastEvent || !alarm.lastEvent.parameters) {
-            return [];
-          }
-          return _.map(alarm.lastEvent.parameters, parameter => {
-            return parameter.name;
-          });
-        })), name => name), true);
+        let columnMappings = [
+            'id',
+            'label',
+            'labelSource',
+            'foreignSource',
+            'foreignId',
+            'location',
+            'createTime',
+            'parent.id',
+            'parent.foreignSource',
+            'parent.foreignId',
+            'type',
+            'sysObjectId',
+            'sysName',
+            'sysDescription',
+            'sysLocation',
+            'sysContact',
+            'netBiosName',
+            'netBiosDomain',
+            'operatingSystem',
+            'lastCapsdPoll',
+            'ipInterface.snmpInterface.physAddr',
+            'ipInterface.ifIndex',
+            'ipInterface.ipAddress',
+            'categories.name'
+        ];
 
-        // Include the event parameters as columns
-        _.each(parameterNames, parameterName => {
-          columnNames.push("Param_" + parameterName);
-        });
+        /*
+        interface Column {
+            text: string;
+            title?: string;
+            type?: string;
+            sort?: boolean;
+            desc?: boolean;
+            filterable?: boolean;
+            unit?: string;
+        }
         */
 
         let getPrimary = (node) => {
@@ -320,8 +342,14 @@ export class OpenNMSInventoryDatasource {
             return undefined;
         };
 
-        let columns = _.map(columnNames, column => {
-            return { "text" : column }
+        const columns = columnNames.map((col, index) => {
+            const name = columnMappings[index];
+            const chopped = name ? name.split('.') : [];
+            return {
+                name: chopped[chopped.length - 1],
+                resource: name,
+                text: col
+            };
         });
 
         let self = this;
