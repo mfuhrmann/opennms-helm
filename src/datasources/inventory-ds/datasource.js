@@ -1,9 +1,10 @@
 import {ClientDelegate} from '../../lib/client_delegate';
-import {API, Model} from '../../opennms';
+import {API} from '../../opennms';
 import {FilterCloner} from '../../lib/query/FilterCloner';
 import {Mapping} from './Mapping';
 import _ from 'lodash';
 
+/*
 const FeaturedAttributes = [
     'label',
     'foreignSource',
@@ -11,6 +12,7 @@ const FeaturedAttributes = [
     'location',
     'ipAddress',
 ];
+*/
 
 const isNumber = function isNumber(num) {
     return ((parseInt(num,10) + '') === (num + ''));
@@ -63,17 +65,6 @@ export class OpenNMSInventoryDatasource {
   buildQuery(filter, options) {
       var clonedFilter = new FilterCloner().cloneFilter(filter);
 
-      /*
-      // Before replacing any variables, add a global time range restriction (which is hidden to the user)
-      if (options && options.enforceTimeRange) {
-          clonedFilter.withAndRestriction(
-              new API.NestedRestriction()
-                  .withAndRestriction(new API.Restriction("lastEventTime", API.Comparators.GE, "$range_from"))
-                  .withAndRestriction(new API.Restriction("lastEventTime", API.Comparators.LE, "$range_to")));
-      }
-      */
-
-      // Substitute $<variable> or [[variable]] in the restriction value
       this.substitute(clonedFilter.clauses, options);
       return clonedFilter;
   }
@@ -222,61 +213,30 @@ export class OpenNMSInventoryDatasource {
   }
 
   metricFindQuery(query) {
-    if (!query || !query.find) {
-        return this.q.when([]);
+    console.log('metricFindQuery: ' + query);
+    if (query === null || query === undefined || query === "") {
+        return this.$q.when([]);
     }
 
-    if (query.find === "attributes") {
-        if (query.strategy === 'featured') {
-            const featuredAttributes = _.map(_.sortBy(FeaturedAttributes), (attribute) => {
-                return {id: attribute}
-            });
-            return this.q.when(featuredAttributes);
-        }
-        // assume all
-        return this.client.getProperties();
-    }
-    if (query.find === "comparators") {
-        const attribute = new Mapping.AttributeMapping().getApiAttribute(query.attribute);
-        return this.client.getPropertyComparators(attribute);
-    }
-    if (query.find == 'values') {
-        return this.searchForValues(query);
-    }
-    if (query.find === 'operators') {
-        return this.client.findOperators();
-    }
-    return this.q.when([]);
+    return this.searchForValues(query);
   }
 
   searchForValues(query) {
-      let attribute = new Mapping.AttributeMapping().getApiAttribute(query.attribute);
+      let attribute = new Mapping.AttributeMapping().getApiAttribute(query);
       if (attribute === 'ipAddr') {
           attribute = 'ipInterface.ipAddress';
       }
-      if (attribute === 'isSituation' || attribute === 'isInSituation') {
-        return this.q.when([{ id: 'false', label: 'false'}, {id: 'true', label: 'true'}]);
-      }
-      return this.client.findProperty(attribute)
+      console.log('searchForValues:', attribute);
+      return this.client.findNodeProperty(attribute)
           .then(property => {
+              console.log('property=', property);
               if (!property) {
                   return this.q.when([]);
               }
-              // Special handling for properties
-              switch(property.id) {
-                  // Severity is handled separately as otherwise the severity ordinal vs the severity label would be
-                  // used, but that may not be ideal for the user
-                  case 'severity':
-                      return this.q.when(_.map(Model.Severities, severity => {
-                          return {
-                              id: severity.id,
-                              label: severity.label
-                          }
-                      }));
-              }
               return property.findValues({limit: 1000}).then(values => {
+                  console.log('values=', values);
                   return values.map(value => {
-                      return {id: value, label: value}
+                      return {text: value ? ''+value : value, value: value}
                   });
               });
           });
@@ -284,40 +244,32 @@ export class OpenNMSInventoryDatasource {
 
     // Converts the data fetched from the Node REST Endpoint of OpenNMS to the grafana table model
     toTable(nodes /*, metadata */) {
-        let columnNames = [
-            "ID", "Label", "Label Source", "Foreign Source", "Foreign ID", "Location",
-            "Creation Time", "Parent ID", "Parent Foreign Source", "Parent Foreign ID",
-            "Type", "SNMP sysObjectID", "SNMP sysName", "SNMP sysDescription", "SNMP sysLocation",
-            "SNMP sysContact", "NETBIOS/SMB Name", "NETBIOS/SMB Domain", "Operating System",
-            "Last Poll Time", "Primary SNMP Physical Address", "Primary SNMP ifIndex", "Primary IP Interface", "Categories",
-            "Data Source"
-        ];
-
-        let columnMappings = [
-            'id',
-            'label',
-            'labelSource',
-            'foreignSource',
-            'foreignId',
-            'location',
-            'createTime',
-            'parent.id',
-            'parent.foreignSource',
-            'parent.foreignId',
-            'type',
-            'sysObjectId',
-            'sysName',
-            'sysDescription',
-            'sysLocation',
-            'sysContact',
-            'netBiosName',
-            'netBiosDomain',
-            'operatingSystem',
-            'lastCapsdPoll',
-            'ipInterface.snmpInterface.physAddr',
-            'ipInterface.ifIndex',
-            'ipInterface.ipAddress',
-            'categories.name'
+        const columns = [
+            { text: 'ID', resource: 'id' },
+            { text: 'Label', resource: 'label' },
+            { text: 'Label Source', resource: 'labelSource' },
+            { text: 'Foreign Source', resource: 'foreignSource' },
+            { text: 'Foreign ID', resource: 'foreignId' },
+            { text: 'Location', resource: 'location' },
+            { text: 'Creation Time', resource: 'createTime' },
+            { text: 'Parent ID', resource: 'parentId' },
+            { text: 'Parent Foreign Source', resource: 'parentForeignSource' },
+            { text: 'Parent Foreign ID', resource: 'parentForeignId' },
+            { text: 'Type', resource: 'type' },
+            { text: 'SNMP sysObjectID', resource: 'sysObjectId' },
+            { text: 'SNMP sysName', resource: 'sysName' },
+            { text: 'SNMP sysDescription', resource: 'sysDescription' },
+            { text: 'SNMP sysLocation', resource: 'sysLocation' },
+            { text: 'SNMP sysContact', resource: 'sysContact' },
+            { text: 'NETBIOS/SMB Name', resource: 'netBiosName' },
+            { text: 'NETBIOS/SMB Domain', resource: 'netBiosDomain' },
+            { text: 'Operating System', resource: 'operatingSystem' },
+            { text: 'Last Poll Time', resource: 'lastCapsdPoll' },
+            /* { text: 'Primary SNMP Physical Address', resource: 'ipInterface.snmpInterface.physAddr' }, */
+            { text: 'Primary SNMP ifIndex', resource: 'ifIndex' },
+            { text: 'Primary IP Interface', resource: 'ipAddress' },
+            { text: 'Categories', resource: 'category' },
+            { text: 'Data Source' }
         ];
 
         /*
@@ -341,16 +293,6 @@ export class OpenNMSInventoryDatasource {
             }
             return undefined;
         };
-
-        const columns = columnNames.map((col, index) => {
-            const name = columnMappings[index];
-            const chopped = name ? name.split('.') : [];
-            return {
-                name: chopped[chopped.length - 1],
-                resource: name,
-                text: col
-            };
-        });
 
         let self = this;
         let rows = _.map(nodes, node => {
@@ -378,7 +320,7 @@ export class OpenNMSInventoryDatasource {
                 node.netBiosDomain,
                 node.operatingSystem,
                 node.lastCapsdPoll,
-                primarySnmp && primarySnmp.physAddr ? primarySnmp.physAddr.toString() : undefined,
+                /* primarySnmp && primarySnmp.physAddr ? primarySnmp.physAddr.toString() : undefined, */
                 primarySnmp ? primarySnmp.ifIndex : undefined,
                 primaryIpInterface && primaryIpInterface.ipAddress ? primaryIpInterface.ipAddress.correctForm() : undefined,
                 node.categories ? node.categories.map(cat => cat.name) : undefined,
@@ -386,25 +328,6 @@ export class OpenNMSInventoryDatasource {
                 // Data Source
                 self.name
             ];
-
-            /*
-            // Index the event parameters by name
-            let eventParametersByName = {};
-            if (node.lastEvent && node.lastEvent.parameters) {
-              _.each(node.lastEvent.parameters, parameter => {
-                eventParametersByName[parameter.name] = parameter.value;
-              });
-            }
-
-            // Append the event parameters to the row
-            row = row.concat(_.map(parameterNames, parameterName => {
-              if (_.has(eventParametersByName, parameterName)) {
-                return eventParametersByName[parameterName];
-              } else {
-                return undefined;
-              }
-            }));
-            */
 
             row.meta = {
                 // Store the alarm for easy access by the panels - may not be necessary

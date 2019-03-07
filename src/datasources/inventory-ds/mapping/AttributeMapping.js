@@ -3,13 +3,16 @@ import _ from 'lodash';
 export class AttributeMapping {
     constructor() {
         this.attributeMapping = {
-            'category': 'category.name',
-            /*
-            'location': 'location.locationName',
-            'service': 'serviceType.name',
-            'ipAddress': 'ipAddr',
-            'severity': 'severity'
-            */
+            category: 'category.name',
+            categories: 'category.name',
+            'categories.name': 'category.name',
+            ifIndex: 'snmpInterface.ifIndex',
+            ipAddress: 'ipInterface.ipAddress',
+            ipHostname: 'ipInterface.ipHostname',
+            location: 'location.locationName',
+            parentId: 'parent.id',
+            parentForeignSource: 'parent.foreignSource',
+            parentForeignId: 'parent.foreindId',
         };
     }
 
