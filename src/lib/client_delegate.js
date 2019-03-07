@@ -117,6 +117,22 @@ export class ClientDelegate {
         }).catch(this.decorateError);
     }
 
+    getNodeProperties() {
+        return this.getNodeDao()
+            .then(nodeDao => {
+                return nodeDao.searchProperties();
+            }).catch(this.decorateError);
+    }
+
+    findNodeProperty(propertyId) {
+        return this.getNodeProperties()
+            .then(properties => {
+                return _.find(properties, function(property) {
+                    return property.id === propertyId;
+                });
+            });
+    }
+
     // Fault related functions
 
     getAlarmDao() {
