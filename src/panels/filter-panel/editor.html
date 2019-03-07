@@ -1,30 +1,18 @@
 <div class="editor-row">
     <div class="section gf-form-group">
-        <h5 class="section-heading">Grouping</h5>
-        <div class="gf-form">
-            <span class="gf-form-label width-8">Type</span>
-            <div class="gf-form-select-wrapper max-width-10">
-                <select class="gf-form-input"
-                        ng-model="ctrl.panel.groupProperty"
-                        ng-change="ctrl.refresh()">
-                    <option value="acknowledged">Acknowledged</option>
-                    <option value="severity">Severity</option>
-                </select>
+        <h5 class="section-heading">Choose Columns</h5>
+        <div class="gf-form-inline">
+            <div class="gf-form">
+                <label class="gf-form-label width-6">Columns:</label>
             </div>
-        </div>
-    </div>
-
-    <div class="section gf-form-group">
-        <h5 class="section-heading">Settings</h5>
-        <div class="gf-form">
-            <span class="gf-form-label width-8">Direction</span>
-            <div class="gf-form-select-wrapper max-width-10">
-                <select class="gf-form-input"
-                        ng-model="ctrl.panel.direction"
-                        ng-change="ctrl.refresh()">
-                    <option value="vertical">Vertical</option>
-                    <option value="horizontal">Horizontal</option>
-                </select>
+            <div class="gf-form column-reorder" ng-repeat="column in editor.panel.columns" id="column-{{$index}}" draggable="true">
+                <label class="gf-form-label">
+                    <i class="pointer fa fa-remove" ng-click="editor.removeColumn(column)"></i>
+                    <span>{{column.text}}</span>
+                </label>
+            </div>
+            <div class="gf-form">
+                <metric-segment segment="editor.addColumnSegment" get-options="editor.getColumnOptions()" on-change="editor.addColumn()"></metric-segment>
             </div>
         </div>
     </div>
