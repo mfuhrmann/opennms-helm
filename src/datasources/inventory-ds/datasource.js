@@ -250,11 +250,11 @@ export class OpenNMSInventoryDatasource {
             { text: 'Label Source', resource: 'labelSource' },
             { text: 'Foreign Source', resource: 'foreignSource' },
             { text: 'Foreign ID', resource: 'foreignId' },
-            { text: 'Location', resource: 'location' },
+            { text: 'Location', resource: 'location.locationName' },
             { text: 'Creation Time', resource: 'createTime' },
-            { text: 'Parent ID', resource: 'parentId' },
-            { text: 'Parent Foreign Source', resource: 'parentForeignSource' },
-            { text: 'Parent Foreign ID', resource: 'parentForeignId' },
+            { text: 'Parent ID', resource: 'parent.id' },
+            { text: 'Parent Foreign Source', resource: 'parent.foreignSource' },
+            { text: 'Parent Foreign ID', resource: 'parent.foreignId' },
             { text: 'Type', resource: 'type' },
             { text: 'SNMP sysObjectID', resource: 'sysObjectId' },
             { text: 'SNMP sysName', resource: 'sysName' },
@@ -266,9 +266,10 @@ export class OpenNMSInventoryDatasource {
             { text: 'Operating System', resource: 'operatingSystem' },
             { text: 'Last Poll Time', resource: 'lastCapsdPoll' },
             /* { text: 'Primary SNMP Physical Address', resource: 'ipInterface.snmpInterface.physAddr' }, */
-            { text: 'Primary SNMP ifIndex', resource: 'ifIndex' },
-            { text: 'Primary IP Interface', resource: 'ipAddress' },
-            { text: 'Categories', resource: 'category' },
+            { text: 'Primary SNMP ifIndex', resource: 'snmpInterface.ifIndex' },
+            { text: 'Primary IP Interface', resource: 'ipInterface.ipAddress' },
+            { text: 'Primary IP Hostname', resource: 'ipInterface.ipHostname' },
+            { text: 'Categories', resource: 'category.name' },
             { text: 'Data Source' }
         ];
 
@@ -323,6 +324,7 @@ export class OpenNMSInventoryDatasource {
                 /* primarySnmp && primarySnmp.physAddr ? primarySnmp.physAddr.toString() : undefined, */
                 primarySnmp ? primarySnmp.ifIndex : undefined,
                 primaryIpInterface && primaryIpInterface.ipAddress ? primaryIpInterface.ipAddress.correctForm() : undefined,
+                primaryIpInterface && primaryIpInterface.ipHostname ? primaryIpInterface.ipHostname : undefined,
                 node.categories ? node.categories.map(cat => cat.name) : undefined,
 
                 // Data Source
