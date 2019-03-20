@@ -113,6 +113,8 @@ module.exports = function(grunt) {
         files: {
           "dist/panels/alarm-table/css/table.dark.css": "src/panels/alarm-table/sass/table.dark.scss",
           "dist/panels/alarm-table/css/table.light.css": "src/panels/alarm-table/sass/table.light.scss",
+          "dist/panels/filter-panel/css/filter.dark.css": "src/panels/filter-panel/sass/filter.dark.scss",
+          "dist/panels/filter-panel/css/filter.light.css": "src/panels/filter-panel/sass/filter.light.scss",
           "dist/datasources/perf-ds/css/opennms.dark.css": "src/datasources/perf-ds/sass/opennms.dark.scss",
           "dist/datasources/perf-ds/css/opennms.light.css": "src/datasources/perf-ds/sass/opennms.light.scss"
         }

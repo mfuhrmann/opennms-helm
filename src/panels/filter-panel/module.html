@@ -1,9 +1,8 @@
-<div class="panel-columns submenu-controls">
-    <div>Manual:</div>
-    <div class="submenu-item gf-form-inline" ng-repeat="variable in columnVariables">
+<div class="filter-panel panel-columns submenu-controls">
+    <div class="submenu-item gf-form-inline" ng-repeat="v in columnVariables">
         <div class="gf-form">
-            <label class="gf-form-label template-variable">{{variable.label || variable.name}}</label>
-            <onms-value-select-dropdown variable="variable" on-updated="ctrl.variableUpdated(variable)"></onms-value-select-dropdown>
+            <label class="gf-form-label template-variable">{{v.label || v.name}}</label>
+            <onms-value-select-dropdown variable="v" on-updated="ctrl.variableUpdated(v)"></onms-value-select-dropdown>
         </div>
     </div>
 </div>

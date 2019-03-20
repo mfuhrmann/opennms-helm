@@ -232,8 +232,13 @@ export class OnmsValueSelectDropdownCtrl {
     this.updateLinkText();
 
     if (this.variable.current.text !== this.oldVariableText) {
-      this.onUpdated();
+      this.callOnUpdated();
     }
+  }
+
+  callOnUpdated() {
+    console.log('dropdown.callOnUpdated');
+    this.onUpdated();
   }
 
   queryChanged() {
