@@ -748,7 +748,7 @@ describe("OpenNMS_FaultManagement_Datasource", function() {
         };
 
         const createDatasource = function(settings, ctx) {
-            ctx.datasource = new Datasource(settings, ctx.$q, ctx.backendSrv, ctx.templateSrv, ctx.contextSrv);
+            ctx.datasource = new Datasource(settings, ctx.$q, ctx.backendSrv, ctx.templateSrv, ctx.contextSrv, ctx.dashboardSrv);
             return ctx.datasource;
         };
 
@@ -759,6 +759,11 @@ describe("OpenNMS_FaultManagement_Datasource", function() {
             ctx.templateSrv = new TemplateSrv();
             ctx.uiSegmentSrv = uiSegmentSrv;
             ctx.contextSrv = {user: {login: "admin", email: "admin@opennms.org", name:"The Administrator"}};
+            ctx.dashboardSrv = {
+                dashboard: {
+                    panels: []
+                }
+            }
             ctx.range_from = moment();
             ctx.range_to = ctx.range_from.add(1, 'days');
             createDatasource(defaultSettings, ctx);

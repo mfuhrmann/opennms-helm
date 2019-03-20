@@ -15,7 +15,9 @@ class FilterCtrl extends MetricsPanelCtrl {
         this.timeSrv = timeSrv;
 
         _.defaults(this.panel, {
-            columns: []
+            columns: [],
+            selected: {},
+            inputTypes: {}
         });
         this.columnData = {};
 
@@ -41,8 +43,6 @@ class FilterCtrl extends MetricsPanelCtrl {
 
     onDataReceived(data) {
         this.columnData = data ? data[0] : {};
-        this.$scope.columns = this.panel.columns.map(column => this.getColumn(column));
-        this.$scope.columnVariables = this.$scope.columns.map(column => this.getVariable(column));
 
         //console.log('got data:', this.columnData);
         this.render();
@@ -55,7 +55,16 @@ class FilterCtrl extends MetricsPanelCtrl {
     }
 
     onRender() {
+        this.$scope.columns = this.panel.columns.map(column => this.getColumn(column));
+        this.$scope.columnVariables = this.$scope.columns.map(column => this.getVariable(column));
         console.log('onRender: this=', this);
+    }
+
+    typeChanged(col) {
+        console.log('type changed:', col);
+        if (col && col.text) {
+            this.panel.inputTypes[col.text] = col.inputType;
+        }
     }
 
     getColumn(obj) {
@@ -66,89 +75,72 @@ class FilterCtrl extends MetricsPanelCtrl {
             }
         }
         obj.type = 'query';
+        obj.inputType = obj.inputType || this.panel.inputTypes[obj.text] || 'multi';
         console.log('getColumn:', obj);
         return obj;
     }
 
     getVariable(column) {
-        const query = columnCache[column.text] ? columnCache[column.text] : this.variableSrv.createVariableFromModel(column);
+        if (!this.datasource) {
+            // things are not quite initialized yet
+            return undefined;
+        }
+
+        const label = column.text;
+        const resource = column.resource;
+
+        let query;
+        if (columnCache[label]) {
+            query = columnCache[label];
+        } else {
+            query = this.variableSrv.createVariableFromModel(column);
+            const selected = this.panel.selected[label];
+            console.log('query created:', query);
+            console.log('selected:', selected);
+            if (selected) {
+                query.options.forEach(opt => {
+                    opt.selected = selected.value.contains(opt.value);
+                });
+                query.current = selected;
+                if (query.current) {
+                    query.current.resource = resource;
+                }
+            }
+        }
 
         query.datasource = this.datasource.name;
         query.includeAll = true;
-        query.label = column.text;
-        query.resource = column.resource;
-        query.query = column.resource;
+        query.label = label;
+        query.resource = resource;
+        query.query = resource;
 
         query.updateOptions().then(function() {
             console.log('query updated:', query);
         });
 
-        query.multi = true;
-
-        /*
-        if (!query.options || query.options.length === 0) {
-            query.options = [{
-                text: 'All',
-                value: '$__all',
-            }];
-        }
-
-        const selected = query.options ? query.options.filter(opt => opt.selected).map(opt => opt.text) : [];
-
-        if (this.columnData && this.columnData.columns) {
-            let options = [{
-                text: 'All',
-                value: '$__all',
-                selected: selected.indexOf('All') >= 0 || selected.length === 0
-            }];
-
-            let index = -1;
-            this.columnData.columns.forEach((col, i) => {
-                if (col.text === column.text) {
-                    index = i;
-                    return false;
-                }
-            });
-            if (index >= 0) {
-                const data = this.columnData.rows.map(row => row[index]);
-                console.log('Found column index for ' + column.text + ': ' + index, data);
-                options = options.concat(data.map(row => {
-                    const text = '' + row;
-                    return {
-                        text: text,
-                        value: row,
-                        selected: selected.indexOf(text) >= 0
-                    }
-                }));
-            } else {
-                console.log('No column index for ' + column.text + ' :(');
-            }
-            query.options = options;
-        }
-        query.current = query.options.filter(opt => opt.selected);
-
-        const currentTexts = query.current.map(col => col.text);
-        query.linkText = currentTexts.join(' + ');
-
-        */
+        query.multi = column.inputType === 'multi' || column.inputType === undefined;
         return query;
     }
 
-    /*
-    query(data, column) {
-        let result = [];
+    variableUpdated(variable) {
+        const self = this;
 
-        for (let i = 0; i < data.length; i++) {
-            const columnIndex = _.findIndex(data[i].columns, {text: column});
-            const rows = data[i] && data[i].rows ? data[i].rows : [];
-            for (let j = 0; j < rows.length; j++) {
-                result.push(data[i].rows[j][columnIndex]);
-            }
+        console.log('variable updated:', variable);
+        if (variable.current) {
+            variable.current.resource = variable.resource;
         }
-
-        return result;
+        this.panel.selected[variable.label] = variable.current;
+        console.log('variable updated: panel:', self.panel);
+        console.log('variable updated: self:', self);
+        self.dashboard.panels.forEach(panel => {
+            if (panel === self.panel) {
+                console.log('skipping ' + panel.title);
+            } else {
+                console.log('re-rendering ' + panel.title);
+                panel.refresh();
+            }
+        });
     }
-    */
 }
 
 FilterCtrl.templateUrl = 'panels/filter-panel/module.html';

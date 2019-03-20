@@ -1,19 +1,28 @@
-<div class="editor-row">
+<div class="editor-row filter-panel">
     <div class="section gf-form-group">
-        <h5 class="section-heading">Choose Columns</h5>
-        <div class="gf-form-inline">
-            <div class="gf-form">
-                <label class="gf-form-label width-6">Columns:</label>
+        <h5 class="section-heading">Filter Columns:</h5>
+        <div class="gf-form column-reorder filter-column" ng-repeat="column in editor.panel.columns" id="column-{{$index}}" draggable="true">
+            <div class="gf-form-inline gf-form-label">
+                <i class="pointer fa fa-remove" ng-click="editor.removeColumn(column)"></i>
+                <span class="onms-label width-10">{{column.text}}</span>
+                <div class="onms-radio-group">
+                    <span class="radio-item">
+                        <input type="radio" id="radio-{{$index}}-single" name="radio-{{$index}}" ng-model="column.inputType" class="gf-form-input" ng-value="'single'" ng-change="ctrl.typeChanged(column)">
+                        <label for="radio-{{$index}}-single">Single</label>
+                    </span>
+                    <span class="radio-item">
+                        <input type="radio" id="radio-{{$index}}-multi" name="radio-{{$index}}" ng-model="column.inputType" class="gf-form-input" ng-value="'multi'" ng-change="ctrl.typeChanged(column)">
+                        <label for="radio-{{$index}}-multi">Multi</label>
+                    </span>
+                    <span class="radio-item">
+                        <input type="radio" id="radio-{{$index}}-text" name="radio-{{$index}}" ng-model="column.inputType" class="gf-form-input" ng-value="'text'" ng-change="ctrl.typeChanged(column)">
+                        <label for="radio-{{$index}}-text">Text</label>
+                    </span>
+                </div>
             </div>
-            <div class="gf-form column-reorder" ng-repeat="column in editor.panel.columns" id="column-{{$index}}" draggable="true">
-                <label class="gf-form-label">
-                    <i class="pointer fa fa-remove" ng-click="editor.removeColumn(column)"></i>
-                    <span>{{column.text}}</span>
-                </label>
-            </div>
-            <div class="gf-form">
-                <metric-segment segment="editor.addColumnSegment" get-options="editor.getColumnOptions()" on-change="editor.addColumn()"></metric-segment>
-            </div>
+        </div>
+        <div class="gf-form">
+            <metric-segment segment="editor.addColumnSegment" get-options="editor.getColumnOptions()" on-change="editor.addColumn()"></metric-segment>
         </div>
     </div>
 </div>

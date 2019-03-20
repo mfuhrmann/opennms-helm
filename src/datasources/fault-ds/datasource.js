@@ -16,13 +16,14 @@ const isNumber = function isNumber(num) {
 
 export class OpenNMSFMDatasource {
 
-  constructor(instanceSettings, $q, backendSrv, templateSrv, contextSrv) {
+  constructor(instanceSettings, $q, backendSrv, templateSrv, contextSrv, dashboardSrv) {
     this.type = instanceSettings.type;
     this.url = instanceSettings.url;
     this.name = instanceSettings.name;
     this.q = $q;
     this.backendSrv = backendSrv;
     this.templateSrv = templateSrv;
+    this.dashboardSrv = dashboardSrv;
     this.alarmClient = new ClientDelegate(instanceSettings, backendSrv, $q);
 
     // When enabled in the datasource, the grafana user should be used instead of the datasource username on
@@ -37,13 +38,45 @@ export class OpenNMSFMDatasource {
     }
   }
 
+  getPanelRestrictions() {
+    const self = this;
+    const dashboard = self.dashboardSrv.dashboard;
+    const filterPanel = dashboard.panels.filter(panel => panel.type === 'opennms-helm-filter-panel')[0];
+    let restrictions = [];
+
+    if (filterPanel && filterPanel.selected) {
+        console.log('selected=', filterPanel.selected);
+        for (const label of Object.keys(filterPanel.selected)) {
+            let restriction = new API.NestedRestriction();
+            const selected = filterPanel.selected[label];
+            const resource = selected.resource ? selected.resource : label.toLowerCase();
+            if (selected.value) {
+                const values = Array.isArray(selected.value) ? selected.value : [ selected.value ];
+                values.forEach(val => {
+                    if (!self.templateSrv.isAllValue(val)) {
+                        restriction.withOrRestriction(new API.Restriction('node.' + resource, API.Comparators.EQ, val));
+                    }
+                });
+            }
+            if (restriction.clauses && restriction.clauses.length !== 0) {
+                restrictions.push(restriction);
+            }
+        }
+    }
+    return restrictions;
+  }
+
   query(options) {
+      console.log('query:', options);
+      console.log('query.this:', this);
       // Initialize filter
       var filter = options.targets[0].filter || new API.Filter();
       filter.limit = options.targets[0].limit || 0; // 0 = no limit
 
       options.enforceTimeRange = true;
       const clonedFilter = this.buildQuery(filter, options);
+
+      console.log('clonedFilter:', clonedFilter);
 
       var self = this;
       return this.alarmClient.findAlarms(clonedFilter).then(alarms => {
@@ -68,6 +101,11 @@ export class OpenNMSFMDatasource {
                   .withAndRestriction(new API.Restriction("lastEventTime", API.Comparators.GE, "$range_from"))
                   .withAndRestriction(new API.Restriction("lastEventTime", API.Comparators.LE, "$range_to")));
       }
+
+      const panelRestrictions = this.getPanelRestrictions();
+      console.log('panelRestrictions:', panelRestrictions);
+
+      panelRestrictions.forEach(res => clonedFilter.withAndRestriction(res));
 
       // Substitute $<variable> or [[variable]] in the restriction value
       this.substitute(clonedFilter.clauses, options);
