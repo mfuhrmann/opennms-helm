@@ -17,6 +17,7 @@ const plugins = [
   'panels/alarm-histogram',
   'panels/alarm-table',
   'panels/filter-panel',
+  'panels/flow-histogram',
 ];
 
 const baseconfig = {
@@ -34,6 +35,8 @@ const baseconfig = {
     'jquery.flot',
     'jquery.flot.crosshair',
     'jquery.flot.selection',
+    'jquery.flot.stack',
+    'jquery.flot.time',
     'lodash',
     'moment',
     function (_context, request, callback) {
@@ -116,6 +119,8 @@ function createConfig(options) {
       'panels/alarm-table/css/table.light': 'src/panels/alarm-table/sass/table.light.scss',
       'panels/filter-panel/css/filter.dark': 'src/panels/filter-panel/sass/filter.dark.scss',
       'panels/filter-panel/css/filter.light': 'src/panels/filter-panel/sass/filter.light.scss',
+      'panels/flow-histogram/css/legend.dark': 'src/panels/flow-histogram/sass/legend.dark.scss',
+      'panels/flow-histogram/css/legend.light': 'src/panels/flow-histogram/sass/legend.light.scss',
     };
 
     config.module.rules = config.module.rules.concat([
