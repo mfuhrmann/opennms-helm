@@ -14,9 +14,18 @@ export class FilterPanelEditorCtrl {
     this.panel = this.panelCtrl.panel;
     $scope.panel = this.panel;
 
-    $scope.datasourceType = undefined;
     this.entityTypes = entityTypes;
     
+    if (!$scope.current) {
+      $scope.current = {};
+    }
+    if (!$scope.current.datasourceType) {
+      $scope.current.datasourceType = undefined;
+    }
+    if (!$scope.current.entityType) {
+      $scope.current.entityType = entityTypes[0];
+    }
+
     this.srcIndex = undefined;
     this.destIndex = undefined;
 
@@ -27,27 +36,37 @@ export class FilterPanelEditorCtrl {
       editor.addEventListener(e, (evt) => { this.handleEvent(e, evt); }, false);
     }
 
-    if (!$scope.entityType) {
-      $scope.entityType = entityTypes[0];
-    }
-
     $scope.reset = this.reset;
     this.reset();
   }
 
-  setDatasource(datasource) {
-    this.datasourceSrv.get(datasource).then((ds) => {
-      this.$scope.datasourceType = ds.type;
-      console.log('Setting datasource to:', ds);
+  async updateCurrent() {
+    await this.$scope.$evalAsync(() => {});
+
+    const current = this.$scope.current;
+
+    console.log('updating current:', current);
+    const dsName = current.datasource && current.datasource.name ? current.datasource.name : undefined;
+    await this.setDatasource(dsName);
+    this.setEntityType(current.entityType);
+    this.render();
+  }
+
+  async setDatasource(dsName) {
+    console.log('Setting datasource to: ' + dsName);
+    try {
+      const ds = await this.datasourceSrv.get(dsName);
+      this.$scope.current.datasourceType = ds.type;
       console.log('Scope:', this.$scope);
-    }).catch(() => {
-      this.$scope.datasourceType = undefined;
-    });
+    } catch(err) {
+      console.warn('Failed to get datasource ' + dsName, err);
+      this.$scope.current.datasourceType = undefined;
+    }
   }
 
   setEntityType(type) {
     const t = type ? type : this.entityTypes[0];
-    this.$scope.entityType = type;
+    this.$scope.current.entityType = t;
     console.log('Setting entity type to:', t);
     console.log('Scope:', this.$scope);
   }
@@ -147,7 +166,7 @@ export class FilterPanelEditorCtrl {
 
     await $scope.$evalAsync(() => {});
 
-    const entityType = ds.type === 'opennms-helm-entity-datasource' ? $scope.entityType : undefined;
+    const entityType = ds.type === 'opennms-helm-entity-datasource' ? $scope.current.entityType : undefined;
 
     const opts = {
       queryType: 'attributes'
@@ -179,7 +198,7 @@ export class FilterPanelEditorCtrl {
 
     const ds = await self.datasourceSrv.get(dsName);
 
-    const entityType = ds.type === 'opennms-helm-entity-datasource' ? $scope.entityType : undefined;
+    const entityType = ds.type === 'opennms-helm-entity-datasource' ? $scope.current.entityType : undefined;
 
     const opts = {
       queryType: 'attributes'
@@ -207,18 +226,52 @@ export class FilterPanelEditorCtrl {
     this.panelCtrl.render();
   }
 
-  reset() {
-    this.$scope.datasources = this.datasourceSrv.getMetricSources().filter(ds => {
-      return !ds.meta.mixed && ds.value !== null;
-    });
-    this.$scope.datasource = this.panel.datasource;
-    this.render();
+  async getDatasource(dsName) {
+    const ds = await this.datasourceSrv.get(dsName);
+    console.log('getDatasource: ' + (dsName ? dsName : 'default') + '=', ds);
+    return ds;
   }
 
-  removeColumn(column, index) {
+  getMetricSource(ds) {
+    if (!ds || !ds.name) {
+      return null;
+    }
+    return {
+      name: ds.name,
+      value: ds.name,
+      sort: ds.name,
+      meta: ds
+    };
+  }
+
+  getDatasources() {
+    return this.datasourceSrv.getMetricSources().filter(ds => {
+      return !ds.meta.mixed && ds.value !== null;
+    });
+  }
+
+  async reset() {
+    this.$scope.datasources = this.getDatasources();
+
+    const current = this.$scope.current;
+    if (this.panel.datasource) {
+      const ds = await this.getDatasource(this.panel.datasource);
+      current.datasource = this.getMetricSource(ds);
+    }  else {
+      const ds = await this.getDatasource();
+      current.datasource = this.$scope.datasources.filter((existing) => {
+        return ds.name === existing.name;
+      })[0];
+    }
+
+    current.entityType =  undefined;
+    await this.updateCurrent();
+  }
+
+  async removeColumn(column, index) {
     console.log('removing column:', column);
     this.panel.columns.splice(index, 1);
-    this.reset();
+    await this.reset();
   }
 }
 
